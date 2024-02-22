@@ -1,0 +1,2 @@
+nvidia-docker pull registry.baidubce.com/paddlepaddle/paddle:2.6.0-gpu-cuda12.0-cudnn8.9-trt8.6
+https://account.alibabacloud.com/login/login.htm?spm=a2798.12277262.6791778070.45.5ea7559975ej4d&lang=tc&oauth_callback=https%3A%2F%2Fhk.alibabacloud.com%2Ftc%3Futm_key%3Dse_1008113281%26utm_content%3Dse_1008113281%26gad_source%3D1%26gclid%3DEAIaIQobChMIuomm_JawhAMVNdpMAh1UMA9aEAAYASAAEgKm2PD_BwE

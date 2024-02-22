@@ -1,0 +1,247 @@
+# VisionTransformer
+
+## 1. 图像与Transformer基础
+
+【32， 32， 3】 H* W*C
+
+
+
+transformer基本结构： encoder 与decoder
+
+![image-20240217160541784](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217160541784.png)
+
+
+
+Feed Forward Network: forward 
+
+Normalize: layer normal
+
+MSA
+
+
+
+VIT把图像分解为image tokens
+
+
+
+![image-20240217160817493](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217160817493.png)
+
+linear projection可以理解为线性化拉直flatten的过程，即卷积
+
+
+
+chunk：切分tensor
+
+
+
+
+
+## 2. 注意力机制
+
+MSA层
+
+
+
+
+
+attention最早由rnn引入， rnn转为seq2seq，依次依次翻译
+
+![image-20240217174512352](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217174512352.png)
+
+![image-20240217204858297](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217204858297.png)
+
+最初由权重$\alpha$ 来确定注意力权重，让 $\alpha$ 变为可学习的
+
+
+
+
+
+![image-20240217205105724](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217205105724.png)
+
+如何让他学习呢？
+
+让 $\alpha$变为网络学习计算得出的, 如下图，proj_k是科学西的
+
+![image-20240217205351438](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217205351438.png)
+
+
+
+也可以让他更复杂一点来计算相似度，再加一个query分支
+
+![image-20240217205747461](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217205747461.png)
+
+
+
+这样就可以得到q,k,v分别的特征向量
+
+![image-20240217210959951](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217210959951.png)
+
+那么如何推导出对于x1单个的attention呢？ (attention是针对单个tocken的)
+
+=》 让query1与所有的key去点乘 $q_1 * k_1 = s_1$
+
+![image-20240217211155442](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217211155442.png)
+
+再将s123 scale并作software max
+
+![image-20240217211325629](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217211325629.png)
+
+最终相加得到最终的softmax
+
+![image-20240217211425710](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217211425710.png)
+
+
+
+d_k即我们的embed_dim, q,k,v的长度
+
+![image-20240217211645454](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217211645454.png)
+
+
+
+最终有多少个token最终将会得到多少个feature (即attention)
+
+
+
+得到这么多feature,最后总需要一个总的weight来统一所有head的意见，即 multi-head self attention
+
+![image-20240217212027106](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217212027106.png)
+
+
+
+
+
+Linear层只接受一个形状为 (batch_size, *, in_feature)的tensor
+
+
+
+
+
+## 3. VIT全模型
+
+![image-20240217232740226](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217232740226.png)
+
+
+
+Batch Norm: 对每一个channel 去求mean和var
+
+类似于图片， 每一维有一个固定的feature去学习，他们之间是有关联性的 
+
+
+
+Layer Norm: 把所有channel都加起来求mean和var
+
+对于一个句子，可能每一个单词之间是有关系的，但可能关系没这么紧密
+
+
+
+![image-20240217233351901](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217233351901.png)
+
+
+
+
+
+Post Norm和PreNorm
+
+![image-20240217233739505](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240217233739505.png)
+
+PreNorm效果会比较好，
+
+
+
+Position EMbeding: 提供位置信息 
+
+ 
+
+![image-20240218001113156](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218001113156.png)
+
+
+
+
+
+ ## 4.训练VIT
+
+DeIT (Data Efficient Image  ) 解决了ViT难以训练的问题
+
+- 采用了 更好的超参数设置
+- 以及多个数据增广
+- 知识蒸馏 
+
+=>保证模型更好地收敛，且可用小规模数据训练
+
+ 
+
+
+
+### 4.1 知识蒸馏
+
+
+
+![image-20240218230713225](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218230713225.png)
+
+用更大的，预训练的teacher model (本身不参与训练)训练student model
+
+
+
+$\tau $蒸馏temperature （与scale for softmax相似），在做softmax前防止特征分布的不均匀，使得输出结果更加平滑
+
+
+
+Soft Lable由概率分布表示(distribution)
+
+Hard Prediction为标签
+
+
+
+我们希望老师和学生的输出接近， 用KLDivLoss(teacher loss)使得学生与老师的输出接近
+
+同时还可以拉出一个分支于GT做对比，得出CE loss
+
+
+
+
+
+Deit中使用于class token类似的方式，单独拉一个tocken做知识蒸馏
+
+![image-20240218232209949](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218232209949.png)
+
+
+
+### 4.2 Data Augmentation 和训练
+
+![image-20240218232618025](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218232618025.png)
+
+
+
+
+
+数据增广
+
+![image-20240218232857882](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218232857882.png)
+
+Mixup：加权取平均
+
+Cutmix：截取取
+
+
+
+Random aug
+
+![image-20240218233325504](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240218233325504.png)warmup learning rate
+
+和smoothinglabel平均分
+
+
+
+
+
+## 5. Swin transformer
+
+![image-20240219002752225](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240219002752225.png)
+
+多了一个window概念  
+
+
+
+
+
+![image-20240219002922862](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240219002922862.png)
