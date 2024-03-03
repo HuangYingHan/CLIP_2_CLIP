@@ -238,10 +238,212 @@ Random aug
 
 ![image-20240219002752225](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240219002752225.png)
 
-多了一个window概念  
+防止patch size限制对下游任务不友好的问题（patch size小计算量大，patch size大可能无法完成任务），多了一个window概念  
 
 
+
+不同scale的attention
 
 
 
 ![image-20240219002922862](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240219002922862.png)
+
+ 
+
+patch  merge: 每过一层与相邻层作merge
+
+
+
+
+
+step 1:
+
+![image-20240226005605759](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226005605759.png)
+
+step2 : window partition （从tensor切window,无交叉）
+
+![image-20240226005728112](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226005728112.png)
+
+step3: windows mutlti head self attention,减少计算量
+
+![image-20240226005834288](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226005834288.png)
+
+
+
+step4: patch nerge:
+
+​	相邻的四个patch (image token)融合,减小feature map
+
+![image-20240226010022889](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226010022889.png)
+
+
+
+step5: 
+
+![image-20240226010122501](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226010122501.png)
+
+两个连续的swin block
+
+![image-20240226011223072](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226011223072.png)
+
+
+
+WMSA:
+
+![image-20240226011447934](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226011447934.png)
+
+每个window提出来单独作attention
+
+
+
+传统transformer的计算量
+
+![image-20240226012854360](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226012854360.png)
+
+
+
+swin transformer的计算量
+
+![image-20240226013224497](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226013224497.png)
+
+
+
+
+
+Patch Merge
+
+![image-20240226013449264](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226013449264.png)
+
+
+
+
+
+![image-20240226015116842](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226015116842.png)
+
+
+
+
+
+shift: windows之间没有作交互  
+
+- how to get attention across windows: 
+  - option1: sliding window 
+  - option2: shifted window multi head self attention - 用不同尺寸的windows
+
+![image-20240226232843298](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226232843298.png)
+
+ 
+
+如何位移图像？
+
+tensor.roll
+
+![image-20240226233623186](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226233623186.png)
+
+![image-20240226234310430](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226234310430.png)
+
+![image-20240226234656970](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240226234656970.png)
+
+再用attention mask达到同一个shift之间互不影响的作用
+
+
+
+ 
+
+
+
+![image-20240227000124141](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227000124141.png)
+
+不要的部分给-100
+
+
+
+
+
+
+
+Relative Position bias: 可学习的，学习各个windows之间相对的位置信息 
+
+![image-20240227000322473](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227000322473.png)
+
+
+
+
+
+![image-20240227001041726](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227001041726.png)
+
+ 
+
+![image-20240227001416103](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227001416103.png)
+
+
+
+
+
+>  `register_buffer`的作用是将个tensor注册到模型的 buffers() 属性中，并命名为a,这代表a对应的是一个持久态，不会有梯度传播给它，但是能被模型的state_dict记录下来。可以理解为模型的**常数**。
+
+
+
+
+
+![image-20240227001953964](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227001953964.png)
+
+
+
+
+
+to generate mask
+
+![image-20240227002053663](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227002053663.png)
+
+蓝色小方框都是0
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 6. 卷积和Transformer结合的ViT
+
+
+
+![image-20240227013624069](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227013624069.png)
+
+conv: local特征， transformer: global
+
+
+
+
+
+ModelViT:
+
+ViT + Conv实现小型化ViT模型
+
+![image-20240227014115480](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227014115480.png)
+
+
+
+![image-20240227014158056](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227014158056.png)
+
+![image-20240227014347719](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227014347719.png)
+
+
+
+
+
+![image-20240227014453826](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227014453826.png)
+
+怎么把tensor输入到transformer里面去？
+
+![image-20240227014536609](/home/yinghanhuang/snap/typora/86/.config/Typora/typora-user-images/image-20240227014536609.png)
+
+ 
+
+空洞卷积
