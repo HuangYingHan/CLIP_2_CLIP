@@ -39,7 +39,7 @@ class TranslateX(object):
 class TranslateY(object):
     def __init__(self, fillcolor=(128, 128, 128)):
         self.fillcolor = fillcolor
-
+    import cv2
     def __call__(self, x, magnitude):
         return x.transform(
             x.size, Image.AFFINE, (1, 0, 0, 0, 1, magnitude * x.size[1] * random.choice([-1, 1])),

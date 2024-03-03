@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from model.simple_tokenizer import tokenize, SimpleTokenizer
 
 
 class Bottleneck(nn.Module):
@@ -194,14 +195,14 @@ class Transformer(nn.Module):
 
 class VisionTransformer(nn.Module):
     def __init__(self, input_resolution: int, patch_size: int, width: int, layers: int, heads: int, output_dim: int):
-        super.__init__()
+        super().__init__()
         self.input_resolution = input_resolution
         self.output_dim = output_dim
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
 
         scale = width ** -0.5
         self.class_embedding = nn.Parameter(scale * torch.randn(width))
-        self.positional_embedding = nn.Paramter(scale * torch.randn((input_resolution // patch_size) ** 2 + 1, width))
+        self.positional_embedding = nn.Parameter(scale * torch.randn((input_resolution // patch_size) ** 2 + 1, width))
         self.ln_pre = LayerNorm(width)
         self.transformer = Transformer(width, layers, heads)
 
@@ -266,7 +267,7 @@ class CLIP(nn.Module):
                 heads=vision_heads,
                 output_dim=embed_dim
             )
-
+        self.tokenizer = SimpleTokenizer()
         self.transformer = Transformer(
             width=transformer_width,
             layers=transformer_layers,
@@ -328,6 +329,7 @@ class CLIP(nn.Module):
         return self.visual(image.type(self.dtype))
     
     def encode_text(self, text):
+        text = tokenize(self.tokenizer, text).to(self.visual.conv1.weight.device)
         x = self.token_embedding(text).type(self.dtype)
         x = x + self.positional_embedding.type(self.dtype)
 

@@ -8,7 +8,7 @@ from PIL import Image
 from .utils_aug import center_crop, resize
 
 #---------------------------------------------------#
-#   对输入图像进行resize
+#   Resize input image
 #---------------------------------------------------#
 def letterbox_image(image, size, letterbox_image):
     w, h = size
@@ -31,8 +31,7 @@ def letterbox_image(image, size, letterbox_image):
     return new_image
 
 #---------------------------------------------------------#
-#   将图像转换成RGB图像，防止灰度图在预测时报错。
-#   代码仅仅支持RGB图像的预测，所有其它类型的图像都会转化成RGB
+#   Image to RGB
 #---------------------------------------------------------#
 def cvtColor(image):
     if len(np.shape(image)) == 3 and np.shape(image)[2] == 3:
@@ -40,3 +39,11 @@ def cvtColor(image):
     else:
         image = image.convert('RGB')
         return image 
+    
+
+def preprocess_input(image):
+    image /= 255.0
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+    image = (image - mean) / std
+    return image
