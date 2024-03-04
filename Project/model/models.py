@@ -11,6 +11,7 @@ from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normal
 from tqdm import tqdm
 
 from .simple_tokenizer import SimpleTokenizer as _Tokenizer
+from .clip import build_model
 
 try:
     from torchvision.transforms import InterpolationMode

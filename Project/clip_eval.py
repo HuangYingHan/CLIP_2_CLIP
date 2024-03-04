@@ -41,7 +41,6 @@ if __name__ == "__main__":
     
     i_features = []
     t_features = []
-
     for iteration, batch in tqdm(enumerate(gen_val)):
         images, texts = batch
         with torch.no_grad():
@@ -56,7 +55,7 @@ if __name__ == "__main__":
     for i in tqdm(range(0, num_text, batch_size)):
         text = texts[i: min(num_text, i + batch_size)]
         with torch.no_grad():
-            texts_feature = model.encode_text(texts=text)
+            texts_feature = model.encode_text(text=text)
             t_features.append(texts_feature)
 
     i_features = torch.cat(i_features, 0)

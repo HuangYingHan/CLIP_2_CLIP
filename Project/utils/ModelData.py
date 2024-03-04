@@ -16,25 +16,32 @@ class CLipDataset(data.Dataset):
 
         self.text = []
         self.image_path = []
-        self.text = []
         self.txt2img = {}
         self.img2txt = {}
+        txt_id = 0
 
-        for image_path, desc in self.lines.items():
-            self.image_path.append(image_path)
+        for img_id, (img_path, desc) in enumerate(self.lines.items()):
+            self.image_path.append(img_path)
+            self.img2txt[img_id] = [txt_id]
+            self.txt2img[txt_id] = img_id
             caption = desc["description"]
+            self.text.append(caption)
+            txt_id += 1
+        # for image_path, desc in self.lines.items():
+        #     self.image_path.append(image_path)
+        #     caption = desc["description"]
+        #     self.text.append(caption)
+        #     self.img2txt[image_path] = caption
+        #     self.txt2img[caption] = image_path
 
-            self.img2txt[image_path] = caption
-            self.txt2img[caption] = image_path
-
-            self.autoaugment_flag = autoaugment_flag
+        self.autoaugment_flag = autoaugment_flag
 
     def __len__(self):
         return len(self.lines)
     
     def __getitem__(self, index):
         photo_path = self.image_path[index]
-        caption = self.img2txt[photo_path]
+        caption = self.text[index]
         
         image = Image.open(photo_path).convert('RGB')
 
@@ -63,8 +70,7 @@ class CLipDataset(data.Dataset):
             new_image.paste(image, (dx, dy))
             image_data  = np.array(new_image, np.float32)
 
-            return image_data
-            
+        return image_data
 
 def dataset_collate(batch):
     images      = []
@@ -75,3 +81,4 @@ def dataset_collate(batch):
         
     images      = torch.from_numpy(np.array(images)).type(torch.FloatTensor)
     return images, captions
+
