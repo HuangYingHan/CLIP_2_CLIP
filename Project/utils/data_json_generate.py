@@ -17,12 +17,24 @@ def main():
 
                 if os.path.isfile(image_path):
                     animal_name = folder
+                    if animal_name in ("cat", "Afghan_hound", "caoshu", "Gecko", "Pot_bag_meat"):
+                        if (animal_name == "cat"):
+                            target = [1, 0, 0, 0, 0]
+                            image_data[image_path] = target
+                        elif (animal_name == "Afghan_hound"):
+                            target = [0, 1, 0, 0, 0]
+                            image_data[image_path] = target
+                        elif (animal_name == "caoshu"):
+                            target = [0, 0, 1, 0, 0]
+                            image_data[image_path] = target
+                        elif (animal_name == "Gecko"):
+                            target = [0, 0, 0, 1, 0]
+                            image_data[image_path] = target
+                        elif (animal_name == "Pot_bag_meat"):
+                            target = [0, 0, 0, 0, 1]
+                            image_data[image_path] = target
 
-                    description = f"a photo of a {animal_name}"
-
-                    image_data[image_path] = {"description": description}
-
-    json_file_path = os.path.join(main_folder, "all_data.json")
+    json_file_path = os.path.join(main_folder, "five_classes_data.json")
     with open(json_file_path, "w") as f:
         json.dump(image_data, f, indent=4)
 

@@ -1,16 +1,18 @@
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 import json
 from model.clip import CLIP
 from model import models
-from utils.ModelData import CLipDataset, dataset_collate
-from utils.metrics import itm_eval
+from utils.ModelData import CLipDataset
+from model.models import tokenize
+from sklearn.metrics import precision_score, recall_score
 
 if __name__ == "__main__":
     datasets_path = "/home/yinghanhuang/Dataset/self_clip/"
-    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/all_data.json"
+    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/five_classes_data.json"
     batch_size = 32
     num_workers = 4
 
@@ -18,8 +20,7 @@ if __name__ == "__main__":
     #     embed_dim=512,
     #     # image
     #     image_resolution=224,
-    #     vision_layers=12,
-    #     vision_width=768,
+    #     vision_layers=12,s
     #     vision_patch_size=32,
     #     # text
     #     context_length=77,
@@ -36,38 +37,37 @@ if __name__ == "__main__":
     input_shape = [224, 224];
     
     val_dataset = CLipDataset(input_shape, False, lines, False)
-    gen_val     = DataLoader(val_dataset, shuffle=False, batch_size=batch_size, num_workers=num_workers, pin_memory=True,
-                            drop_last=False, collate_fn=dataset_collate, sampler=None)
-    
-    i_features = []
-    t_features = []
-    for iteration, batch in tqdm(enumerate(gen_val)):
-        images, texts = batch
+    data_loader     = DataLoader(val_dataset, shuffle=False, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
+
+    total_correct, step = 0, 0.
+    texts = tokenize(["a photo of cat", "a photo of dog", "a photo of calligraphy", "a photo of lizard", "a photo of meat"]).to(device)
+    predict_labels = []
+    true_labels = []
+    for iteration, (data, target) in tqdm(enumerate(data_loader)):
         with torch.no_grad():
             if model.cuda:
-                images  = images.cuda()
+                data, target  = data.cuda(), target.cuda()
             
-            images_feature = model.encode_image(images)
-            i_features.append(images_feature)
+                image_feature = model.encode_image(data)
+                image_feature /= image_feature.norm(dim=-1, keepdim=True)
 
-    texts       = gen_val.dataset.text
-    num_text    = len(texts)
-    for i in tqdm(range(0, num_text, batch_size)):
-        text = texts[i: min(num_text, i + batch_size)]
-        with torch.no_grad():
-            texts_feature = model.encode_text(text=text)
-            t_features.append(texts_feature)
+                text_feature = model.encode_text(text=texts)
+                text_feature /= text_feature.norm(dim=-1, keepdim=True)
 
-    i_features = torch.cat(i_features, 0)
-    t_features = torch.cat(t_features, 0)
-    
-    i_features  = i_features / i_features.norm(dim=-1, keepdim=True)
-    t_features  = t_features / t_features.norm(dim=-1, keepdim=True)
+                similarity = 100. * (image_feature @ text_feature.T)
+                probs = F.softmax(similarity, dim=-1)
+                
+                pred = probs.argmax(dim = -1)
+                tar = target.argmax(dim = -1)
+                predict_labels.append(pred.cpu().numpy())
+                true_labels.append(tar.cpu().numpy())
 
-    logits_per_image    = i_features @ t_features.t()
-    logits_per_text     = logits_per_image.t()
+    predict_labels = np.concatenate(predict_labels)
+    true_labels = np.concatenate(true_labels)
 
-    logits_per_image    = logits_per_image.cpu().numpy()
-    logits_per_text     = logits_per_text.cpu().numpy()
-    print(itm_eval(logits_per_image, logits_per_text, gen_val.dataset.txt2img, gen_val.dataset.img2txt))
+    precision = precision_score(true_labels, predict_labels, average='macro')
+    recall = recall_score(true_labels, predict_labels, average='macro')
 
+    # Print the precision and recall
+    print("Precision:", precision)
+    print("Recall:", recall)

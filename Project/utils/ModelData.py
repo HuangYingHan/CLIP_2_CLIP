@@ -13,27 +13,12 @@ class CLipDataset(data.Dataset):
         self.input_shape = input_shape
         self.random = random
         self.lines = lines
-
-        self.text = []
         self.image_path = []
-        self.txt2img = {}
-        self.img2txt = {}
-        txt_id = 0
+        self.target = []
 
-        for img_id, (img_path, desc) in enumerate(self.lines.items()):
+        for _, (img_path, target) in enumerate(self.lines.items()):
             self.image_path.append(img_path)
-            self.img2txt[img_id] = [txt_id]
-            self.txt2img[txt_id] = img_id
-            caption = desc["description"]
-            self.text.append(caption)
-            txt_id += 1
-        # for image_path, desc in self.lines.items():
-        #     self.image_path.append(image_path)
-        #     caption = desc["description"]
-        #     self.text.append(caption)
-        #     self.img2txt[image_path] = caption
-        #     self.txt2img[caption] = image_path
-
+            self.target.append(target)
         self.autoaugment_flag = autoaugment_flag
 
     def __len__(self):
@@ -41,15 +26,15 @@ class CLipDataset(data.Dataset):
     
     def __getitem__(self, index):
         photo_path = self.image_path[index]
-        caption = self.text[index]
-        
+        target = self.target[index]
+        target = np.asarray(target)
         image = Image.open(photo_path).convert('RGB')
 
         # if self.autoaugment_flag:
         image = self.get_random_data(image, self.input_shape, random=self.random)
         image = np.transpose(preprocess_input(np.array(image, dtype='float32')), (2, 0, 1))
 
-        return image, caption
+        return image, target
 
     def get_random_data(self, image, input_shape, random=True):
         iw, ih = image.size
@@ -71,14 +56,4 @@ class CLipDataset(data.Dataset):
             image_data  = np.array(new_image, np.float32)
 
         return image_data
-
-def dataset_collate(batch):
-    images      = []
-    captions    = []
-    for image, caption in batch:
-        images.append(image)
-        captions.append(caption)
-        
-    images      = torch.from_numpy(np.array(images)).type(torch.FloatTensor)
-    return images, captions
 

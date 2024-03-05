@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.simple_tokenizer import tokenize, SimpleTokenizer
+from model.simple_tokenizer import SimpleTokenizer
 
 
 class Bottleneck(nn.Module):
@@ -329,7 +329,7 @@ class CLIP(nn.Module):
         return self.visual(image.type(self.dtype))
     
     def encode_text(self, text):
-        text = tokenize(self.tokenizer, text).to(self.visual.conv1.weight.device)
+        # text = tokenize(self.tokenizer, text).to(self.visual.conv1.weight.device)
         x = self.token_embedding(text).type(self.dtype)
         x = x + self.positional_embedding.type(self.dtype)
 
