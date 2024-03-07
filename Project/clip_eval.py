@@ -12,9 +12,10 @@ from sklearn.metrics import precision_score, recall_score
 
 if __name__ == "__main__":
     datasets_path = "/home/yinghanhuang/Dataset/self_clip/"
-    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/five_classes_data.json"
+    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/two_classes_data_meat.json"
     batch_size = 32
     num_workers = 4
+    prob_threshold= 0.8
 
     # model = CLIP(
     #     embed_dim=512,
@@ -37,10 +38,10 @@ if __name__ == "__main__":
     input_shape = [224, 224];
     
     val_dataset = CLipDataset(input_shape, False, lines, False)
-    data_loader     = DataLoader(val_dataset, shuffle=False, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
+    data_loader     = DataLoader(val_dataset, shuffle=True, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
 
     total_correct, step = 0, 0.
-    texts = tokenize(["a photo of cat", "a photo of dog", "a photo of calligraphy", "a photo of lizard", "a photo of meat"]).to(device)
+    texts = tokenize(["a photo of fried sweet and sour tenderloin", "a photo of pot bag meat"]).to(device) #, "a photo of Afghan hound", "a photo of Saluki", "a photo of Gecko", "a photo of Chamelion", "a photo of cao shu", "a photo of zhuan shu", "a photo of Fried Sweet and Sour Tenderloin", "a photo of Pot bag meat"]).to(device)
     predict_labels = []
     true_labels = []
     for iteration, (data, target) in tqdm(enumerate(data_loader)):
@@ -56,9 +57,11 @@ if __name__ == "__main__":
 
                 similarity = 100. * (image_feature @ text_feature.T)
                 probs = F.softmax(similarity, dim=-1)
-                
+
                 pred = probs.argmax(dim = -1)
                 tar = target.argmax(dim = -1)
+
+                pred[probs.max(dim=-1).values < prob_threshold] = -1
                 predict_labels.append(pred.cpu().numpy())
                 true_labels.append(tar.cpu().numpy())
 

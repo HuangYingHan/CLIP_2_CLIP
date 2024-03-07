@@ -17,24 +17,40 @@ def main():
 
                 if os.path.isfile(image_path):
                     animal_name = folder
-                    if animal_name in ("cat", "Afghan_hound", "caoshu", "Gecko", "Pot_bag_meat"):
-                        if (animal_name == "cat"):
-                            target = [1, 0, 0, 0, 0]
-                            image_data[image_path] = target
-                        elif (animal_name == "Afghan_hound"):
-                            target = [0, 1, 0, 0, 0]
-                            image_data[image_path] = target
-                        elif (animal_name == "caoshu"):
-                            target = [0, 0, 1, 0, 0]
-                            image_data[image_path] = target
-                        elif (animal_name == "Gecko"):
-                            target = [0, 0, 0, 1, 0]
-                            image_data[image_path] = target
-                        elif (animal_name == "Pot_bag_meat"):
-                            target = [0, 0, 0, 0, 1]
-                            image_data[image_path] = target
+                    # if animal_name in ("cat", "lion" "Afghan_hound", "Saluki"):
+                    if (animal_name == "caoshu"):
+                        target = [1, 0]
+                        image_data[image_path] = target
+                    elif (animal_name == "zhuanshu"):
+                        target = [0, 1]
+                        image_data[image_path] = target
+                    # elif (animal_name == "Afghan_hound"):
+                    #     target = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "Saluki"):
+                    #     target = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "Gecko"):
+                    #     target = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "Chameleon"):
+                    #     target = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "caoshu"):
+                    #     target = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "zhuanshu"):
+                    #     target = [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "Fried_Sweet_and_Sour_Tenderloin"):
+                    #     target = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+                    #     image_data[image_path] = target
+                    # elif (animal_name == "Pot_bag_meat"):
+                    #     target = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+                    #     image_data[image_path] = target
 
-    json_file_path = os.path.join(main_folder, "five_classes_data.json")
+
+    json_file_path = os.path.join(main_folder, "two_classes_data_shufa.json")
     with open(json_file_path, "w") as f:
         json.dump(image_data, f, indent=4)
 
