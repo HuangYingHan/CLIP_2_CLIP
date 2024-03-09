@@ -12,7 +12,7 @@ from sklearn.metrics import precision_score, recall_score
 
 if __name__ == "__main__":
     datasets_path = "/home/yinghanhuang/Dataset/self_clip/"
-    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/two_classes_data_meat.json"
+    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/selected_data.json"
     batch_size = 32
     num_workers = 4
     prob_threshold= 0.8
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     data_loader     = DataLoader(val_dataset, shuffle=True, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
 
     total_correct, step = 0, 0.
-    texts = tokenize(["a photo of fried sweet and sour tenderloin", "a photo of pot bag meat"]).to(device) #, "a photo of Afghan hound", "a photo of Saluki", "a photo of Gecko", "a photo of Chamelion", "a photo of cao shu", "a photo of zhuan shu", "a photo of Fried Sweet and Sour Tenderloin", "a photo of Pot bag meat"]).to(device)
+    texts = tokenize(["a photo of cat", "a photo of lion", "a photo of Afghan hound", "a photo of Saluki", "a photo of Gecko", "a photo of Chamelion", "a photo of cao shu", "a photo of zhuan shu", "a photo of Fried Sweet and Sour Tenderloin", "a photo of Pot bag meat"]).to(device)
     predict_labels = []
     true_labels = []
     for iteration, (data, target) in tqdm(enumerate(data_loader)):
