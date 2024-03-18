@@ -20,8 +20,8 @@ def main():
     taiyi_model.eval()
     clip_model.eval()
 
-    chinese_query_texts = ["一张猫的照片", "一张狮子的照片", "一张阿富汗猎犬的照片", "一张萨路基的照片", "一张壁虎的照片", "一张变色龙的照片", "一张草书的照片", "一张篆书的照片", "一张锅包肉的照片", "一张糖醋里脊的照片"]
-    english_query_texts = ["a photo of cat", "a photo of lion", "a photo of Afghan hound", "a photo of Saluki", "a photo of gecko", "a photo of chameleon", "a photo of cao shu", "a photo of zhuan shu", "a photo of guobao pork", "a photo of sweet and sour pork"]
+    chinese_query_texts = ["一张糖醋里脊的照片", "一张锅包肉的照片"]# ["一张猫的照片", "一张狮子的照片", "一张阿富汗猎犬的照片", "一张萨路基的照片", "一张壁虎的照片", "一张变色龙的照片", "一张草书的照片", "一张篆书的照片", "一张锅包肉的照片", "一张糖醋里脊的照片"]
+    english_query_texts = ["a photo of sweet and sour pork", "a photo of guobao pork"]# ["a photo of cat", "a photo of lion", "a photo of Afghan hound", "a photo of Saluki", "a photo of gecko", "a photo of chameleon", "a photo of cao shu", "a photo of zhuan shu", "a photo of guobao pork", "a photo of sweet and sour pork"]
 
     chinese_text_tokenizer = BertTokenizer.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/taiyi_clip/IDEA-CCNL/Taiyi-CLIP-Roberta-large-326M-Chinese")
     chinese_text_encoder = BertForSequenceClassification.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/taiyi_clip/IDEA-CCNL/Taiyi-CLIP-Roberta-large-326M-Chinese").eval()
@@ -32,7 +32,7 @@ def main():
     # english_text_encoder = BertForSequenceClassification.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/CLIP/weight/textattack/bert-base-uncased-yelp-polarity/", problem_type="multi_label_classification").eval()
     english_text = english_text_tokenizer(english_query_texts, return_tensors='pt', padding=True)['input_ids'].to(device)
 
-    json_data = "/home/yinghanhuang/Dataset/self_clip/all_classes_target_data.json"
+    json_data = "/home/yinghanhuang/Dataset/self_clip/two_classes_data_meat.json"
 
     colltected ={}
     collected_img_path = []
@@ -68,7 +68,7 @@ def main():
 
     json_output_path = "/home/yinghanhuang/Dataset/self_clip/selected_data.json"
 
-    with open(json_output_path, "w") as f:
+    with open(json_output_path, "a") as f:
         json.dump(colltected, f, indent=4)
 
 if __name__ == '__main__':

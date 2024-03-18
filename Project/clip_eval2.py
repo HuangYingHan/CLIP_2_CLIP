@@ -10,6 +10,8 @@ import torch.nn.functional as F
 import json
 from sklearn.metrics import precision_score, recall_score
 
+from model.models import tokenize
+
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     taiyi_model = CLIPModel.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/taiyi_clip/openai/clip-vit-large-patch14").to(device)
@@ -20,19 +22,19 @@ if __name__ == "__main__":
     taiyi_model.eval()
     clip_model.eval()
 
-    chinese_query_texts = ["一张猫的照片", "一张狮子的照片", "一张阿富汗猎犬的照片", "一张萨路基的照片", "一张壁虎的照片", "一张变色龙的照片", "一张草书的照片", "一张篆书的照片", "一张锅包肉的照片", "一张糖醋里脊的照片"]
-    english_query_texts = ["a photo of cat", "a photo of lion", "a photo of Afghan hound", "a photo of Saluki", "a photo of gecko", "a photo of chameleon", "a photo of cao shu", "a photo of zhuan shu", "a photo of guobao pork", "a photo of sweet and sour pork"]
+    chinese_query_texts = ["一张猫的照片", "一张阿富汗猎犬的照片", "一张壁虎的照片", "一张草书的照片", "一张糖醋里脊的照片", "一张其他的照片"]
+    english_query_texts = ["a photo of cat", "a photo of Afghan hound", "a photo of gecko", "a photo of cao shu", "a photo of sweet and sour pork", "a photo of others"]
 
     chinese_text_tokenizer = BertTokenizer.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/taiyi_clip/IDEA-CCNL/Taiyi-CLIP-Roberta-large-326M-Chinese")
     chinese_text_encoder = BertForSequenceClassification.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/taiyi_clip/IDEA-CCNL/Taiyi-CLIP-Roberta-large-326M-Chinese").eval()
     chinese_text_encoder.to(device)
     chinese_text = chinese_text_tokenizer(chinese_query_texts, return_tensors='pt', padding=True)['input_ids'].to(device)
     
-    english_text_tokenizer = BertTokenizer.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/CLIP/weight/textattack/bert-base-uncased-yelp-polarity/")
+    # english_text_tokenizer = BertTokenizer.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/CLIP/weight/textattack/bert-base-uncased-yelp-polarity/")
     # english_text_encoder = BertForSequenceClassification.from_pretrained("/home/yinghanhuang/Project/CLIP_2_CLIP/CLIP/weight/textattack/bert-base-uncased-yelp-polarity/", problem_type="multi_label_classification").eval()
-    english_text = english_text_tokenizer(english_query_texts, return_tensors='pt', padding=True)['input_ids'].to(device)
-
-    json_data = "/home/yinghanhuang/Dataset/self_clip/selected_data_llava.json"
+    # english_text = english_text_tokenizer(english_query_texts, return_tensors='pt', padding=True)['input_ids'].to(device)
+    english_text = tokenize(english_query_texts).to(device)
+    json_data = "/home/yinghanhuang/Dataset/self_clip/selected_data_out_llava.json"
 
     chinese_predict_labels = []
     english_predict_labels = []

@@ -12,7 +12,7 @@ from sklearn.metrics import precision_score, recall_score
 
 if __name__ == "__main__":
     datasets_path = "/home/yinghanhuang/Dataset/self_clip/"
-    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/inclasses_cat_target_data.json"
+    datasets_val_json_path = "/home/yinghanhuang/Dataset/self_clip/inclass_meat2_target_data.json"
     batch_size = 32
     num_workers = 4
     prob_threshold= 0.8
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     data_loader     = DataLoader(val_dataset, shuffle=True, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
 
     total_correct, step = 0, 0.
-    texts = tokenize(["a photo of cat"]).to(device)#,"a photo of Afghan hound", "a photo of Gecko", "a photo of cao shu", "a photo of Fried Sweet and Sour Tenderloin", "a photo of others"]).to(device)
+    texts = tokenize(["a photo of sweet and sour pork"]).to(device)#,"a photo of Afghan hound", "a photo of Gecko", "a photo of cao shu", "a photo of Fried Sweet and Sour Tenderloin", "a photo of others"]).to(device)
     predict_labels = []
     true_labels = []
     for iteration, (data, target) in tqdm(enumerate(data_loader)):
@@ -56,10 +56,10 @@ if __name__ == "__main__":
                 text_feature /= text_feature.norm(dim=-1, keepdim=True)
 
                 similarity = image_feature @ text_feature.T
-                probs = F.softmax(similarity, dim=-1)
+                # probs = F.softmax(similarity, dim=-1)
 
-                pred = probs.argmax(dim = -1)
-                tar = target.argmax(dim = -1)
+                # pred = probs.argmax(dim = -1)
+                # tar = target.argmax(dim = -1)
 
 
                 # pred[probs.max(dim=-1).values < prob_threshold] = -1
@@ -68,27 +68,28 @@ if __name__ == "__main__":
 
     # predict_labels = np.concatenate(predict_labels)
     # true_labels = np.concatenate(true_labels)
-                # predict = torch.ones_like(similarity)
-                # redict[similarity[:, -1] < 0.25] = -1
+                predict = torch.ones_like(similarity)
+                predict[similarity[:, -1] < 0.25] = -1
 
                 # tar = target
-                predict_labels.append(pred.cpu().numpy())
-                true_labels.append(tar.cpu().numpy())
+                predict_labels.append(predict.cpu().numpy())
+                # true_labels.append(tar.cpu().numpy())
     predict_labels = np.concatenate(predict_labels)
-    true_labels = np.concatenate(true_labels)
+    # true_labels = np.concatenate(true_labels)
 
     # # # 计算真正例的数量
-    # true_positive = np.sum(predict_labels[predict_labels == 1])
+    true_positive = np.sum(predict_labels[predict_labels == 1])
 
     # # # 计算数量
-    # total_num = np.sum(true_labels[true_labels == 1])
-
+    #total_num = np.sum(true_labels[true_labels == 1])
+    print(true_positive)
+    # print(total_num)
     # # # 计算精确度
-    # recall = true_positive / total_num
+    recall = true_positive / 200
     # print(recall)
-    precision = precision_score(true_labels, predict_labels, average='macro')
-    recall = recall_score(true_labels, predict_labels, average='macro')
+    # precision = precision_score(true_labels, predict_labels, average='macro')
+    # recall = recall_score(true_labels, predict_labels, average='macro')
 
     # # Print the precision and recall
-    print("Precision:", precision)
+    # print("Precision:", precision)
     print("Recall:", recall)
