@@ -10,3 +10,6 @@
 [submodule "CLIP-Adapter"]
 	path = CLIP-Adapter
 	url = git@github.com:gaopengcuhk/CLIP-Adapter.git
+[submodule "Tip-Adapter"]
+	path = Tip-Adapter
+	url = git@github.com:gaopengcuhk/Tip-Adapter.git
